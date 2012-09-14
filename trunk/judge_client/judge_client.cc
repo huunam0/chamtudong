@@ -138,7 +138,7 @@ void write_log(const char *fmt, ...) {
                 system("pwd");
         }
         va_start(ap, fmt);
-        //l = 
+        //l =
         vsprintf(buffer, fmt, ap);
         fprintf(fp, "%s\n", buffer);
         if (DEBUG)
@@ -550,6 +550,13 @@ void _addceinfo_mysql(int solution_id) {
                 printf("%s\n", mysql_error(conn));
         fclose(fp);
 }
+/* add result of each test */
+void addrun_test(int solution_id, char* test_id, char* error) {
+        char sql[1000];
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%s,%s,NOW())",solution_id, test_id, error);
+        if (mysql_real_query(conn, sql, strlen(sql)))
+            write_log("Error in insert test output here %d, %s: %s",solution_id, test_id, error);
+}
 // urlencoded function copied from http://www.geekhideout.com/urlcode.shtml
 /* Converts a hex character to its integer value */
 char from_hex(char ch) {
@@ -753,7 +760,7 @@ int compile(int lang) {
         const char * CP_PH[] = { "php", "-l","Main.php", NULL };
     const char * CP_PL[] = { "perl","-c", "Main.pl", NULL };
     const char * CP_CS[] = { "gmcs","-warn:0", "Main.cs", NULL };
-        
+
     char javac_buf[4][16];
     char *CP_J[5];
     for(int i=0;i<4;i++) CP_J[i]=javac_buf[i];
@@ -762,7 +769,7 @@ int compile(int lang) {
         sprintf(CP_J[2],"-J%s",java_xmx);
         sprintf(CP_J[3],"Main.java");
         CP_J[4]=(char *)NULL;
-    
+
         pid = fork();
         if (pid == 0) {
                 struct rlimit LIM;
@@ -1134,7 +1141,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
                 int & mem_lmt) {
         nice(19);
                 // now the user is "judger"
-       
+
 //      char java_p1[BUFFER_SIZE], java_p2[BUFFER_SIZE];
         // child
         // set the limit
@@ -1149,7 +1156,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
         setrlimit(RLIMIT_CPU, &LIM);
         alarm(0);
         alarm(time_lmt*10);
-  
+
         // file limit
         LIM.rlim_max = STD_F_LIM + STD_MB;
         LIM.rlim_cur = STD_F_LIM;
@@ -1168,7 +1175,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
     default:
       LIM.rlim_cur=LIM.rlim_max=1;
         }
-        
+
     setrlimit(RLIMIT_NPROC, &LIM);
 
         // set the stack
@@ -1180,7 +1187,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
         LIM.rlim_max = STD_MB *mem_lmt*2;
         if(lang<3)
                 setrlimit(RLIMIT_AS, &LIM);
-        
+
         chdir(work_dir);
         // open the files
         freopen("data.in", "r", stdin);
@@ -1195,7 +1202,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
         while(setgid(1536)!=0) sleep(1);
         while(setuid(1536)!=0) sleep(1);
         while(setresuid(1536, 1536, 1536)!=0) sleep(1);
-        
+
         switch (lang) {
         case 0:
         case 1:
@@ -1205,7 +1212,7 @@ void run_solution(int & lang, char * work_dir, int & time_lmt, int & usedtime,
         case 3:
 //              sprintf(java_p1, "-Xms%dM", mem_lmt / 2);
 //              sprintf(java_p2, "-Xmx%dM", mem_lmt);
-        
+
                 execl("/usr/bin/java", "/usr/bin/java", java_xms,java_xmx,
                                 "-Djava.security.manager",
                                 "-Djava.security.policy=./java.policy", "Main", (char *)NULL);
@@ -1400,7 +1407,7 @@ void watch_solution(pid_t pidApp, char * infile, int & ACflg, int isspj,
                 if (WIFSIGNALED(status)) {
                         /*  WIFSIGNALED: if the process is terminated by signal
                          *
-                         *  psignal(int sig, char *s)，like perror(char *s)，print out s, with error msg from system of sig  
+                         *  psignal(int sig, char *s)，like perror(char *s)，print out s, with error msg from system of sig
        * sig = 5 means Trace/breakpoint trap
        * sig = 11 means Segmentation fault
        * sig = 25 means File size limit exceeded
@@ -1475,7 +1482,7 @@ void watch_solution(pid_t pidApp, char * infile, int & ACflg, int isspj,
         }
         usedtime += (ruse.ru_utime.tv_sec * 1000 + ruse.ru_utime.tv_usec / 1000);
         usedtime += (ruse.ru_stime.tv_sec * 1000 + ruse.ru_stime.tv_usec / 1000);
-  
+
         //clean_session(pidApp);
 }
 void clean_workdir(char * work_dir ) {
@@ -1574,20 +1581,20 @@ int get_test_file(char* work_dir,int p_id){
                 sscanf(filename,"%s",filename);
                 sprintf(localfile,"%s/data/%d/%s",oj_home,p_id,filename);
                 if(DEBUG) printf("localfile[%s]\n",localfile);
-                if(access(localfile,0)==-1){    
+                if(access(localfile,0)==-1){
                         if(strcmp(filename,"spj")==0) continue;
                         execute_cmd("mkdir -p %s/data/%d",oj_home,p_id);
                         const char * cmd2=" wget --post-data=\"gettestdata=1&filename=%d/%s\" --load-cookies=cookie --save-cookies=cookie --keep-session-cookies -q -O \"%s\"  \"%s/admin/problem_judge.php\"";
                         execute_cmd(cmd2,p_id,filename,localfile,http_baseurl);
                         ret++;
-                        
+
                         if(strcmp(filename,"spj.c")==0){
                          //   sprintf(localfile,"%s/data/%d/spj.c",oj_home,p_id);
                             if(access(localfile,0)==0){
                                 const char * cmd3="gcc -o %s/data/%d/spj %s/data/%d/spj.c";
                                 execute_cmd(cmd3,oj_home,p_id,oj_home,p_id);
                             }
-                        
+
                         }
                         if(strcmp(filename,"spj.cc")==0){
                         //     sprintf(localfile,"%s/data/%d/spj.cc",oj_home,p_id);
@@ -1597,213 +1604,189 @@ int get_test_file(char* work_dir,int p_id){
                             }
                         }
                 }
-                
+
         }
         pclose(fjobs);
-        
+
         return ret;
 }
 int main(int argc, char** argv) {
 
-        char work_dir[BUFFER_SIZE];
-        //char cmd[BUFFER_SIZE];
-        char user_id[BUFFER_SIZE];
-        int solution_id = 1000;
-        int runner_id = 0;
-        int p_id, time_lmt, mem_lmt, lang, isspj, sim, sim_s_id,max_case_time=0;
+    char work_dir[BUFFER_SIZE];
+    //char cmd[BUFFER_SIZE];
+    char user_id[BUFFER_SIZE];
+    int solution_id = 1000;
+    int runner_id = 0;
+    int p_id, time_lmt, mem_lmt, lang, isspj, sim, sim_s_id,max_case_time=0;
 
-        init_parameters(argc, argv, solution_id, runner_id);
+    init_parameters(argc, argv, solution_id, runner_id);
 
-        init_mysql_conf();
+    init_mysql_conf();
 
-        if (!http_judge&&!init_mysql_conn()) {
-                exit(0); //exit if mysql is down
-        }
-        //set work directory to start running & judging
-        sprintf(work_dir, "%s/run%s/", oj_home, argv[2]);
-        
-        if(shm_run) mk_shm_workdir(work_dir);
-        
-        chdir(work_dir);
-        execute_cmd("rm %s/*",work_dir);
+    if (!http_judge&&!init_mysql_conn()) {
+            exit(0); //exit if mysql is down
+    }
+    //set work directory to start running & judging
+    sprintf(work_dir, "%s/run%s/", oj_home, argv[2]);
+
+    if(shm_run) mk_shm_workdir(work_dir);
+
+    chdir(work_dir);
+    execute_cmd("rm %s/*",work_dir);
 
     if(http_judge)
-                system("ln -s ../cookie ./");
-        get_solution_info(solution_id, p_id, user_id, lang);
-        //get the limit
+            system("ln -s ../cookie ./");
+    get_solution_info(solution_id, p_id, user_id, lang);
+    //get the limit
+    write_log("Judging solution %d of problem %d by user %d",solution_id, p_id, user_id);
 
+    get_problem_info(p_id, time_lmt, mem_lmt, isspj);
+    //copy source file
 
-        get_problem_info(p_id, time_lmt, mem_lmt, isspj);
-        //copy source file
+    get_solution(solution_id, work_dir, lang);
 
-        get_solution(solution_id, work_dir, lang);
+    //java is lucky
+    if (lang >= 3) {
+            // the limit for java
+            time_lmt = time_lmt + java_time_bonus;
+            mem_lmt = mem_lmt + java_memory_bonus;
+            // copy java.policy
+            execute_cmd( "cp %s/etc/java0.policy %sjava.policy", oj_home, work_dir);
 
-        //java is lucky
-        if (lang >= 3) {
-                // the limit for java
-                time_lmt = time_lmt + java_time_bonus;
-                mem_lmt = mem_lmt + java_memory_bonus;
-                // copy java.policy
-                execute_cmd( "cp %s/etc/java0.policy %sjava.policy", oj_home, work_dir);
+    }
 
-        }
+    //never bigger than judged set value;
+    if (time_lmt > 300 || time_lmt < 1)
+            time_lmt = 300;
+    if (mem_lmt > 1024 || mem_lmt < 1)
+            mem_lmt = 1024;
 
-        //never bigger than judged set value;
-        if (time_lmt > 300 || time_lmt < 1)
-                time_lmt = 300;
-        if (mem_lmt > 1024 || mem_lmt < 1)
-                mem_lmt = 1024;
+    if (DEBUG)
+            printf("time: %d mem: %d\n", time_lmt, mem_lmt);
 
-        if (DEBUG)
-                printf("time: %d mem: %d\n", time_lmt, mem_lmt);
+    // compile
+    //      printf("%s\n",cmd);
+    // set the result to compiling
+    int Compile_OK;
 
-        // compile
-        //      printf("%s\n",cmd);
-        // set the result to compiling
-        int Compile_OK;
+    Compile_OK = compile(lang);
+    if (Compile_OK != 0) {
+        update_solution(solution_id, OJ_CE, 0, 0, 0,0, 0.0);
+        addceinfo(solution_id);
+        update_user(user_id);
+        update_problem(p_id);
+        if(!http_judge)
+                mysql_close(conn);
+        if (!DEBUG)
+                clean_workdir(work_dir);
+        else
+                write_log("compile error");
+        exit(0);
+    } else {
+        update_solution(solution_id, OJ_RI, 0, 0, 0,0, 0.0);
+    }
+    //exit(0);
+    // run
+    char fullpath[BUFFER_SIZE];
+    char infile[BUFFER_SIZE];
+    char outfile[BUFFER_SIZE];
+    char userfile[BUFFER_SIZE];
+    sprintf(fullpath, "%s/data/%d", oj_home, p_id); // the fullpath of data dir
+    // open DIRs
+    DIR *dp;
+    dirent *dirp;
+    // using http to get remote test data files
+    if (http_judge)
+        get_test_file(work_dir,p_id);
+    if ((dp = opendir(fullpath)) == NULL) {
+        write_log("No such dir:%s!\n", fullpath);
+        if(!http_judge)
+            mysql_close(conn);
+        exit(-1);
+    }
+    int ACflg, PEflg;
+    ACflg = PEflg = OJ_AC;
+    int namelen;
+    int usedtime = 0, topmemory = 0;
 
-        Compile_OK = compile(lang);
-        if (Compile_OK != 0) {
-                update_solution(solution_id, OJ_CE, 0, 0, 0,0, 0.0);
-                addceinfo(solution_id);
-                update_user(user_id);
-                update_problem(p_id);
-                if(!http_judge)
-                        mysql_close(conn);
-                if (!DEBUG)
-                        clean_workdir(work_dir);
-                else
-                        write_log("compile error");
-                exit(0);
+    //create chroot for ruby bash python
+    if (lang == 4)
+        copy_ruby_runtime(work_dir);
+    if (lang == 5)
+        copy_bash_runtime(work_dir);
+    if (lang == 6)
+        copy_python_runtime(work_dir);
+    if (lang == 7)
+        copy_php_runtime(work_dir);
+    if (lang == 8)
+        copy_perl_runtime(work_dir);
+    if (lang == 9)
+        copy_mono_runtime(work_dir);
+    // read files and run
+    double pass_rate=0.0;
+    int num_of_test=0;
+    int finalACflg=ACflg;
+    for (;(oi_mode|| ACflg == OJ_AC )&& (dirp = readdir(dp)) != NULL;) {
+        namelen = isInFile(dirp->d_name); // check if the file is *.in or not
+        if (namelen == 0)
+            continue;
+        prepare_files(dirp->d_name, namelen, infile, p_id, work_dir, outfile, userfile, runner_id);
+        init_syscalls_limits(lang);
+        pid_t pidApp = fork();
+        if (pidApp == 0) {
+            run_solution(lang, work_dir, time_lmt, usedtime, mem_lmt);
         } else {
-                update_solution(solution_id, OJ_RI, 0, 0, 0,0, 0.0);
+            watch_solution(pidApp, infile, ACflg, isspj, userfile, outfile, solution_id, lang, topmemory, mem_lmt, usedtime, time_lmt,p_id, PEflg, work_dir);
+            judge_solution(ACflg, usedtime, time_lmt, isspj, p_id, infile, outfile, userfile, PEflg, lang, work_dir, topmemory,        mem_lmt, solution_id,num_of_test);
+            if(use_max_time){
+                max_case_time=usedtime>max_case_time?usedtime:max_case_time;
+                usedtime=0;
+            }
+            //clean_session(pidApp);
         }
-        //exit(0);
-        // run
-        char fullpath[BUFFER_SIZE];
-        char infile[BUFFER_SIZE];
-        char outfile[BUFFER_SIZE];
-        char userfile[BUFFER_SIZE];
-        sprintf(fullpath, "%s/data/%d", oj_home, p_id); // the fullpath of data dir
-
-        // open DIRs
-        DIR *dp;
-        dirent *dirp;
-        // using http to get remote test data files
-        if (http_judge)
-                get_test_file(work_dir,p_id);
-        if ((dp = opendir(fullpath)) == NULL) {
-                
-                write_log("No such dir:%s!\n", fullpath);
-                if(!http_judge)
-                        mysql_close(conn);
-                exit(-1);
-        }
-
-        int ACflg, PEflg;
-        ACflg = PEflg = OJ_AC;
-        int namelen;
-        int usedtime = 0, topmemory = 0;
-
-        //create chroot for ruby bash python
-        if (lang == 4)
-                copy_ruby_runtime(work_dir);
-        if (lang == 5)
-                copy_bash_runtime(work_dir);
-        if (lang == 6)
-                copy_python_runtime(work_dir);
-        if (lang == 7)
-                copy_php_runtime(work_dir);
-        if (lang == 8)
-                copy_perl_runtime(work_dir);
-        if (lang == 9)
-                copy_mono_runtime(work_dir);
-        // read files and run
-        double pass_rate=0.0;
-        int num_of_test=0;
-        int finalACflg=ACflg;
-        for (;(oi_mode|| ACflg == OJ_AC )&& (dirp = readdir(dp)) != NULL;) {
-                
-                namelen = isInFile(dirp->d_name); // check if the file is *.in or not
-                if (namelen == 0)
-                        continue;
-
-                prepare_files(dirp->d_name, namelen, infile, p_id, work_dir, outfile,
-                                userfile, runner_id);
-                init_syscalls_limits(lang);
-
-                pid_t pidApp = fork();
-
-                if (pidApp == 0) {
-
-                        run_solution(lang, work_dir, time_lmt, usedtime, mem_lmt);
-                } else {
-                        
-                        
-                        
-
-                        watch_solution(pidApp, infile, ACflg, isspj, userfile, outfile,
-                                        solution_id, lang, topmemory, mem_lmt, usedtime, time_lmt,
-                                        p_id, PEflg, work_dir);
-                        
-                        
-            judge_solution(ACflg, usedtime, time_lmt, isspj, p_id, infile,
-                                        outfile, userfile, PEflg, lang, work_dir, topmemory,
-                                        mem_lmt, solution_id,num_of_test);
-                        if(use_max_time){
-                                max_case_time=usedtime>max_case_time?usedtime:max_case_time;
-                                usedtime=0;
-                        }
-                        //clean_session(pidApp);
+        if(oi_mode){
+            if(ACflg == OJ_AC && PEflg != OJ_PE){
+                pass_rate++;
+            }else{
+                if (ACflg == OJ_AC && PEflg == OJ_PE){
+                    ACflg = OJ_PE;
+                    PEflg=false;
                 }
-                if(oi_mode){
-                    if(ACflg == OJ_AC && PEflg != OJ_PE){
-                                        pass_rate++;
-                        }else{
-                                if (ACflg == OJ_AC && PEflg == OJ_PE){
-                                        ACflg = OJ_PE;
-                                        PEflg=false;
-                                }
-                                if(ACflg == OJ_RE)addreinfo(solution_id);
-                            finalACflg=ACflg;
-                            ACflg=OJ_AC;
-                        }
-                        num_of_test++;
-                        ACflg = OJ_AC;
-                }
+                addrun_test(solution_id,dirp->d_name,"NOT OK");
+                if(ACflg == OJ_RE)addreinfo(solution_id);
+                finalACflg=ACflg;
+                ACflg=OJ_AC;
+            }
+            num_of_test++;
+            ACflg = OJ_AC;
         }
-        if (ACflg == OJ_AC && PEflg == OJ_PE)
-                ACflg = OJ_PE;
-        if (sim_enable && ACflg == OJ_AC &&(!oi_mode||finalACflg==OJ_AC)&& lang < 5) {//bash don't supported
-                sim = get_sim(solution_id, lang, p_id, sim_s_id);
-        }else{
-            sim = 0;
+    } //end for
+    if (ACflg == OJ_AC && PEflg == OJ_PE)
+        ACflg = OJ_PE;
+    if (sim_enable && ACflg == OJ_AC &&(!oi_mode||finalACflg==OJ_AC)&& lang < 5) {//bash don't supported
+        sim = get_sim(solution_id, lang, p_id, sim_s_id);
+    }else{
+        sim = 0;
     }
     if(ACflg == OJ_RE)addreinfo(solution_id);
     if(use_max_time){
-                                usedtime=max_case_time;
-                 }
-  if(ACflg == OJ_TL){
+        usedtime=max_case_time;
+    }
+    if(ACflg == OJ_TL){
         usedtime=time_lmt*1000;
-  }
-  if(oi_mode){
-                if(num_of_test>0) pass_rate/=num_of_test;
-                update_solution(solution_id, finalACflg, usedtime*num_of_test, topmemory >> 10, sim,
-                        sim_s_id,pass_rate);
-        }else{
-                update_solution(solution_id, ACflg, usedtime, topmemory >> 10, sim,
-                        sim_s_id,0);
-        }
-
-        update_user(user_id);
-        update_problem(p_id);
-        clean_workdir(work_dir);
-
-        if (DEBUG)
-                write_log("result=%d", oi_mode?finalACflg:ACflg);
-        if(!http_judge)
-                mysql_close(conn);
-
-
-        return 0;
+    }
+    if(oi_mode){
+        if(num_of_test>0) pass_rate/=num_of_test;
+        update_solution(solution_id, finalACflg, usedtime*num_of_test, topmemory >> 10, sim, sim_s_id,pass_rate);
+    }else{
+        update_solution(solution_id, ACflg, usedtime, topmemory >> 10, sim, sim_s_id,0);
+    }
+    update_user(user_id);
+    update_problem(p_id);
+    clean_workdir(work_dir);
+    if (DEBUG)
+        write_log("result=%d", oi_mode?finalACflg:ACflg);
+    if(!http_judge)
+        mysql_close(conn);
+    return 0;
 }
