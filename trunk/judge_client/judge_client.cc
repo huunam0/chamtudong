@@ -551,11 +551,11 @@ void _addceinfo_mysql(int solution_id) {
         fclose(fp);
 }
 /* add result of each test */
-void addrun_test(int solution_id, char* test_id, char* error) {
+void addrun_test(int solution_id, int test_id, char* error) {
         char sql[1000];
-        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%s,%s,NOW())",solution_id, test_id, error);
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%d,%s,NOW())",solution_id, test_id, error);
         if (mysql_real_query(conn, sql, strlen(sql)))
-            write_log("Error in insert test output here %d, %s: %s",solution_id, test_id, error);
+            write_log("Error in insert test output here %d, %d: %s",solution_id, test_id, error);
 }
 // urlencoded function copied from http://www.geekhideout.com/urlcode.shtml
 /* Converts a hex character to its integer value */
@@ -1730,6 +1730,7 @@ int main(int argc, char** argv) {
         namelen = isInFile(dirp->d_name); // check if the file is *.in or not
         if (namelen == 0)
             continue;
+
         prepare_files(dirp->d_name, namelen, infile, p_id, work_dir, outfile, userfile, runner_id);
         init_syscalls_limits(lang);
         pid_t pidApp = fork();
@@ -1752,7 +1753,7 @@ int main(int argc, char** argv) {
                     ACflg = OJ_PE;
                     PEflg=false;
                 }
-                addrun_test(solution_id,dirp->d_name,"NOT OK");
+                addrun_test(solution_id,atoi(dirp->d_name),"NOT OK");
                 if(ACflg == OJ_RE)addreinfo(solution_id);
                 finalACflg=ACflg;
                 ACflg=OJ_AC;
