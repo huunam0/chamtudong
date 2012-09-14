@@ -553,7 +553,7 @@ void _addceinfo_mysql(int solution_id) {
 /* add result of each test */
 void addrun_test(int solution_id, int test_id, char* error) {
         char sql[1000];
-        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%d,%s,NOW())",solution_id, test_id, error);
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%d,'%s',NOW())",solution_id, test_id, error);
         if (mysql_real_query(conn, sql, strlen(sql)))
             write_log("Error in insert test output here %d, %d: %s",solution_id, test_id, error);
 }
@@ -1638,7 +1638,7 @@ int main(int argc, char** argv) {
             system("ln -s ../cookie ./");
     get_solution_info(solution_id, p_id, user_id, lang);
     //get the limit
-    write_log("Judging solution %d of problem %d by user %d",solution_id, p_id, user_id);
+    write_log("Judging solution %d of problem %d by user %s",solution_id, p_id, user_id);
 
     get_problem_info(p_id, time_lmt, mem_lmt, isspj);
     //copy source file
