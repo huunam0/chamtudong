@@ -551,11 +551,11 @@ void _addceinfo_mysql(int solution_id) {
         fclose(fp);
 }
 /* add result of each test */
-void addrun_test(int solution_id, int test_id, char* error) {
+void addrun_test(int solution_id, int test_id, int error) {
         char sql[1000];
-        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`error`,`moment`) value (%d,%d,'%s',NOW())",solution_id, test_id, error);
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`status`,`moment`) value (%d,%d,%d,NOW())",solution_id, test_id, error);
         if (mysql_real_query(conn, sql, strlen(sql)))
-            write_log("Error in insert test output here %d, %d: %s",solution_id, test_id, error);
+            write_log("Error in insert test output here %d, %d: %d",solution_id, test_id, error);
 }
 // urlencoded function copied from http://www.geekhideout.com/urlcode.shtml
 /* Converts a hex character to its integer value */
@@ -1748,12 +1748,13 @@ int main(int argc, char** argv) {
         if(oi_mode){
             if(ACflg == OJ_AC && PEflg != OJ_PE){
                 pass_rate++;
+                //addrun_test(solution_id,atoi(dirp->d_name),0);
             }else{
                 if (ACflg == OJ_AC && PEflg == OJ_PE){
                     ACflg = OJ_PE;
                     PEflg=false;
                 }
-                addrun_test(solution_id,atoi(dirp->d_name),"NOT OK");
+                addrun_test(solution_id,atoi(dirp->d_name),1);
                 if(ACflg == OJ_RE)addreinfo(solution_id);
                 finalACflg=ACflg;
                 ACflg=OJ_AC;
