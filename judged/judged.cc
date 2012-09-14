@@ -493,11 +493,7 @@ int main(int argc, char** argv){
 	int j=1;
 	while (!STOP){			// start to run
 	    while(j&&(http_judge||!init_mysql())){ 
-	
-	       
-			    j=work();
-			    
-		    
+			j=work();
 		}
 		sleep(sleep_time);
 		j=1;
