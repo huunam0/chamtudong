@@ -1,12 +1,12 @@
 //
 // File:   main.cc
 // Author: sempr
-// refacted by zhblue
+// refacted by Tran Huu Nam
 /*
- * Copyright 2008 sempr <iamsempr@gmail.com>
+ * Copyright 2012 sempr <iamsempr@gmail.com>
  *
- * Refacted and modified by zhblue<newsclan@gmail.com>
- * Bug report email newsclan@gmail.com
+ * Refacted and modified by Tran Huu Nam <huunam0@gmail.com>
+ * Bug report email huunam0@gmail.com
  *
  *
  * This file is part of HUSTOJ.
@@ -425,11 +425,23 @@ int compare(const char *file1, const char *file2) {
                 f1=fopen(file1,"r");
                 f2=fopen(file2,"r");
                 PEflg=0;
+                char* pch;
                 while (PEflg==0 && fgets(s1,STD_F_LIM,f1) && fgets(s2,STD_F_LIM,f2)) {
-                        delnextline(s1);
-                        delnextline(s2);
-                        if (strcmp(s1,s2)==0) continue;
-                        else PEflg=1;
+                    delnextline(s1);
+                    delnextline(s2);
+                    //BEGIN-THNAM-20120921
+                    //if (strcmp(s1,s2)==0) continue;
+                    //else PEflg=1;
+                    pch = strtok (s1,"|");
+                    bool trung=false;
+                    while (pch != NULL)
+                    {
+                        if (strcmp(pch,s2)==0) trung=true;
+                        pch = strtok (NULL, "|");
+                    }
+                    if (trung) continue;
+                    else PEflg=1;
+                    //END-THNAM-20120921
                 }
                 delete [] s1;
                 delete [] s2;
@@ -1617,7 +1629,7 @@ int main(int argc, char** argv) {
     char user_id[BUFFER_SIZE];
     int solution_id = 1000;
     int runner_id = 0;
-    int p_id, time_lmt, mem_lmt, lang, isspj, sim, sim_s_id,max_case_time=0;
+    int p_id, time_lmt, mem_lmt, lang, isspj, sim, sim_s_id,max_case_time=0,sum_time=0;
 
     init_parameters(argc, argv, solution_id, runner_id);
 
@@ -1736,9 +1748,11 @@ int main(int argc, char** argv) {
         pid_t pidApp = fork();
         if (pidApp == 0) {
             run_solution(lang, work_dir, time_lmt, usedtime, mem_lmt);
+            sum_time+=usedtime;
         } else {
             watch_solution(pidApp, infile, ACflg, isspj, userfile, outfile, solution_id, lang, topmemory, mem_lmt, usedtime, time_lmt,p_id, PEflg, work_dir);
             judge_solution(ACflg, usedtime, time_lmt, isspj, p_id, infile, outfile, userfile, PEflg, lang, work_dir, topmemory,        mem_lmt, solution_id,num_of_test);
+            sum_time+=usedtime;
             if(use_max_time){
                 max_case_time=usedtime>max_case_time?usedtime:max_case_time;
                 usedtime=0;
@@ -1750,13 +1764,15 @@ int main(int argc, char** argv) {
                 pass_rate++;
                 //addrun_test(solution_id,atoi(dirp->d_name),0);
             }else{
+                /**/
                 if (ACflg == OJ_AC && PEflg == OJ_PE){
                     ACflg = OJ_PE;
                     PEflg=false;
                 }
-                addrun_test(solution_id,atoi(dirp->d_name),1);
+                /**/
                 if(ACflg == OJ_RE)addreinfo(solution_id);
-                finalACflg=ACflg;
+                //finalACflg=ACflg;
+                addrun_test(solution_id,atoi(dirp->d_name),ACflg);
                 ACflg=OJ_AC;
             }
             num_of_test++;
@@ -1774,12 +1790,14 @@ int main(int argc, char** argv) {
     if(use_max_time){
         usedtime=max_case_time;
     }
+    /*
     if(ACflg == OJ_TL){
         usedtime=time_lmt*1000;
     }
+    */
     if(oi_mode){
         if(num_of_test>0) pass_rate/=num_of_test;
-        update_solution(solution_id, finalACflg, usedtime*num_of_test, topmemory >> 10, sim, sim_s_id,pass_rate);
+        update_solution(solution_id, finalACflg, sum_time, topmemory >> 10, sim, sim_s_id,pass_rate);
     }else{
         update_solution(solution_id, ACflg, usedtime, topmemory >> 10, sim, sim_s_id,0);
     }
