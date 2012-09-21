@@ -435,10 +435,10 @@ int compare(const char *file1, const char *file2) {
                     //if (strcmp(s1,s2)==0) continue;
                     //else PEflg=1;
                     bool trung=(strcmp(s1,s2)==0);
-                    char* pch = strtok (s2,"|");
+                    char* pch = strtok (s1,"|");
                     while (pch != NULL)
                     {
-                        if (strcmp(pch,s1)==0) trung=true;
+                        if (strcmp(pch,s2)==0) trung=true;
                         pch = strtok (NULL, "|");
                         write_log("test %s",pch);
                     }
