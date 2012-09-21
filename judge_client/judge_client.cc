@@ -110,7 +110,7 @@ static char http_password[BUFFER_SIZE];
 static int shm_run=0;
 
 //static int sleep_tmp;
-#define ZOJ_COM
+//#define ZOJ_COM
 MYSQL *conn;
 
 static char lang_ext[10][8] = { "c", "cc", "pas", "java", "rb", "sh", "py", "php","pl", "cs" };
@@ -415,6 +415,7 @@ int compare(const char *file1, const char *file2) {
         for (p2=s2;EOF!=fscanf(f2,"%s",p2);)
         while (*p2) p2++;
         fclose(f2);
+        /*
         if (strcmp(s1,s2)!=0) {
                 //              printf("A:%s\nB:%s\n",s1,s2);
                 delete[] s1;
@@ -422,6 +423,7 @@ int compare(const char *file1, const char *file2) {
 
                 return OJ_WA;
         } else {
+        */
                 f1=fopen(file1,"r");
                 f2=fopen(file2,"r");
                 PEflg=0;
@@ -432,11 +434,11 @@ int compare(const char *file1, const char *file2) {
                     //BEGIN-THNAM-20120921
                     //if (strcmp(s1,s2)==0) continue;
                     //else PEflg=1;
-                    pch = strtok (s1,"|");
+                    pch = strtok (s2,"|");
                     bool trung=false;
                     while (pch != NULL)
                     {
-                        if (strcmp(pch,s2)==0) trung=true;
+                        if (strcmp(pch,s1)==0) trung=true;
                         pch = strtok (NULL, "|");
                     }
                     if (trung) continue;
@@ -448,7 +450,7 @@ int compare(const char *file1, const char *file2) {
                 fclose(f1);fclose(f2);
                 if (PEflg) return OJ_PE;
                 else return OJ_AC;
-        }
+        //}
 #endif
 }
 
