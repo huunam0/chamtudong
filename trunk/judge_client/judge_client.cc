@@ -427,20 +427,20 @@ int compare(const char *file1, const char *file2) {
                 f1=fopen(file1,"r");
                 f2=fopen(file2,"r");
                 PEflg=0;
-                char* pch;
+                //char* pch;
                 while (PEflg==0 && fgets(s1,STD_F_LIM,f1) && fgets(s2,STD_F_LIM,f2)) {
                     delnextline(s1);
                     delnextline(s2);
                     //BEGIN-THNAM-20120921
                     //if (strcmp(s1,s2)==0) continue;
                     //else PEflg=1;
-                    pch = strtok (s2,"|");
                     bool trung=(strcmp(s1,s2)==0);
+                    char* pch = strtok (s2,"|");
                     while (pch != NULL)
                     {
                         if (strcmp(pch,s1)==0) trung=true;
                         pch = strtok (NULL, "|");
-                        write_log(pch);
+                        write_log("test %s",pch);
                     }
 
                     if (trung) continue;
