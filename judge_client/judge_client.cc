@@ -415,6 +415,7 @@ int compare(const char *file1, const char *file2) {
         for (p2=s2;EOF!=fscanf(f2,"%s",p2);)
         while (*p2) p2++;
         fclose(f2);
+		write_log("jusding '%s' vs '%s'",s1,s2);
         /*
         if (strcmp(s1,s2)!=0) {
                 //              printf("A:%s\nB:%s\n",s1,s2);
@@ -449,7 +450,7 @@ int compare(const char *file1, const char *file2) {
                 }
 				//BEGIN-THNAM-20120930
 				if (PEflg) {
-					write_log("Error '%s' vs '%s'",s1,s2);
+					//write_log("Error '%s' vs '%s'",s1,s2);
 				}
 				//END-THNAM-20120930
                 delete [] s1;
