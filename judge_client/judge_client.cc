@@ -438,15 +438,20 @@ int compare(const char *file1, const char *file2) {
                     char* pch = strtok (s1,"|");
                     while (pch != NULL)
                     {
-                        if (strcmp(pch,s2)==0) trung=true;
+                        //write_log("test %s",pch);
+						if (strcmp(pch,s2)==0) trung=true;
                         pch = strtok (NULL, "|");
-                        write_log("test %s",pch);
                     }
 
                     if (trung) continue;
                     else PEflg=1;
                     //END-THNAM-20120921
                 }
+				//BEGIN-THNAM-20120930
+				if (PEflg) {
+					write_log("Error '%s' vs '%s'",s1,s2);
+				}
+				//END-THNAM-20120930
                 delete [] s1;
                 delete [] s2;
                 fclose(f1);fclose(f2);
