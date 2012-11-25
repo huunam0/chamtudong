@@ -327,11 +327,19 @@ void find_next_nonspace(int & c1, int & c2, FILE *& f1, FILE *& f2, int & ret) {
 
  }
  */
+ /* add result of each test */
+void addrun_test(int solution_id, int test_id, int error, char* output) {
+        char sql[1000];
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`status`,`moment`,`output`) value (%d,%d,%d,NOW(),'%s')",solution_id, test_id, error, output);
+        if (mysql_real_query(conn, sql, strlen(sql)))
+            write_log("Error in insert test output here %d, %d: %d",solution_id, test_id, error);
+}
 /*
  * translated from ZOJ judger r367
  * http://code.google.com/p/zoj/source/browse/trunk/judge_client/client/text_checker.cc#25
  *
  */
+ 
 int compare_zoj(const char *file1, const char *file2) {
         int ret = OJ_AC;
         FILE * f1, *f2;
