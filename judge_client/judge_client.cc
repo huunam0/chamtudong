@@ -581,13 +581,7 @@ void _addceinfo_mysql(int solution_id) {
                 printf("%s\n", mysql_error(conn));
         fclose(fp);
 }
-/* add result of each test */
-void addrun_test(int solution_id, int test_id, int error, char* output) {
-        char sql[1000];
-        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`status`,`moment`,`output`) value (%d,%d,%d,NOW(),'%s')",solution_id, test_id, error, output);
-        if (mysql_real_query(conn, sql, strlen(sql)))
-            write_log("Error in insert test output here %d, %d: %d",solution_id, test_id, error);
-}
+
 // urlencoded function copied from http://www.geekhideout.com/urlcode.shtml
 /* Converts a hex character to its integer value */
 char from_hex(char ch) {
