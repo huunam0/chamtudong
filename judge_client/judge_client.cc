@@ -392,7 +392,7 @@ void delnextline(char s[]) {
                 s[--L] = 0;
 }
 
-int compare(const char *file1, const char *file2) {
+int compare(int solution_id, int test_id, const char *file1, const char *file2) {
 #ifdef ZOJ_COM
         //compare ported and improved from zoj don't limit file size
         return compare_zoj(file1, file2);
@@ -451,6 +451,7 @@ int compare(const char *file1, const char *file2) {
 				//BEGIN-THNAM-20120930
 				if (PEflg) {
 					write_log("Error '%s' vs '%s'",s1,s2);
+					addrun_test(solution_id,test_id,PEflg,s2);
 				}
 				//END-THNAM-20120930
                 delete [] s1;
@@ -573,9 +574,9 @@ void _addceinfo_mysql(int solution_id) {
         fclose(fp);
 }
 /* add result of each test */
-void addrun_test(int solution_id, int test_id, int error) {
+void addrun_test(int solution_id, int test_id, int error, char* output) {
         char sql[1000];
-        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`status`,`moment`) value (%d,%d,%d,NOW())",solution_id, test_id, error);
+        sprintf(sql,"INSERT into ctd_run (`solution`,`test`,`status`,`moment`,`output`) value (%d,%d,%d,NOW(),'%s')",solution_id, test_id, error, output);
         if (mysql_real_query(conn, sql, strlen(sql)))
             write_log("Error in insert test output here %d, %d: %d",solution_id, test_id, error);
 }
@@ -1295,7 +1296,7 @@ int fix_java_mis_judge(char *work_dir, int & ACflg, int & topmemory,
 
 void judge_solution(int & ACflg, int & usedtime, int time_lmt, int isspj,
                 int p_id, char * infile, char * outfile, char * userfile, int & PEflg,
-                int lang, char * work_dir, int & topmemory, int mem_lmt, int solution_id ,double num_of_test)  {
+                int lang, char * work_dir, int & topmemory, int mem_lmt, int solution_id ,double num_of_test, int test_id)  {
         //usedtime-=1000;
         int comp_res;
         if(!oi_mode) num_of_test=1.0;
@@ -1315,7 +1316,7 @@ void judge_solution(int & ACflg, int & usedtime, int time_lmt, int isspj,
                                 comp_res = OJ_WA;
                         }
                 } else {
-                        comp_res = compare(outfile, userfile);
+                        comp_res = compare(solution_id,test_id,outfile, userfile);
                 }
                 if (comp_res == OJ_WA) {
                         ACflg = OJ_WA;
@@ -1717,6 +1718,7 @@ int main(int argc, char** argv) {
     // open DIRs
     DIR *dp;
     dirent *dirp;
+	int test_id=0;
     // using http to get remote test data files
     if (http_judge)
         get_test_file(work_dir,p_id);
@@ -1755,13 +1757,14 @@ int main(int argc, char** argv) {
 
         prepare_files(dirp->d_name, namelen, infile, p_id, work_dir, outfile, userfile, runner_id);
         init_syscalls_limits(lang);
+		test_id=atoi(dirp->d_name);
         pid_t pidApp = fork();
         if (pidApp == 0) {
             run_solution(lang, work_dir, time_lmt, usedtime, mem_lmt);
             sum_time+=usedtime;
         } else {
             watch_solution(pidApp, infile, ACflg, isspj, userfile, outfile, solution_id, lang, topmemory, mem_lmt, usedtime, time_lmt,p_id, PEflg, work_dir);
-            judge_solution(ACflg, usedtime, time_lmt, isspj, p_id, infile, outfile, userfile, PEflg, lang, work_dir, topmemory,        mem_lmt, solution_id,num_of_test);
+            judge_solution(ACflg, usedtime, time_lmt, isspj, p_id, infile, outfile, userfile, PEflg, lang, work_dir, topmemory,        mem_lmt, solution_id,num_of_test,test_id);
             sum_time+=usedtime;
             if(use_max_time){
                 max_case_time=usedtime>max_case_time?usedtime:max_case_time;
@@ -1782,7 +1785,7 @@ int main(int argc, char** argv) {
                 /**/
                 if(ACflg == OJ_RE)addreinfo(solution_id);
                 //finalACflg=ACflg;
-                addrun_test(solution_id,atoi(dirp->d_name),ACflg);
+                //addrun_test(solution_id,test_id,ACflg);
                 ACflg=OJ_AC;
             }
             num_of_test++;
