@@ -448,14 +448,15 @@ int compare(int solution_id, int test_id, const char *file1, const char *file2) 
                     {
                         PEflg=1;
                         write_log("Error '%s' vs '%s'",s1,s2);
+                        addrun_test(solution_id,test_id,PEflg,s2);
                     }
 
                     //END-THNAM-20120921
                 }
 				//BEGIN-THNAM-20120930
 				if (PEflg) {
-					write_log("Error '%s' vs '%s'",s1,s2);
-					addrun_test(solution_id,test_id,PEflg,s2);
+					//write_log("Error '%s' vs '%s'",s1,s2);
+					//addrun_test(solution_id,test_id,PEflg,s2);
 				}
 				//END-THNAM-20120930
                 delete [] s1;
@@ -1774,7 +1775,7 @@ int main(int argc, char** argv) {
             //clean_session(pidApp);
         }
         if(oi_mode){
-            if(ACflg == OJ_AC && PEflg != OJ_PE){
+            if(ACflg == OJ_AC){
                 pass_rate+=1;
                 //addrun_test(solution_id,atoi(dirp->d_name),0);
             }else{
