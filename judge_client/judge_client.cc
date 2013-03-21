@@ -430,6 +430,12 @@ int compare(int solution_id, int test_id, const char *file1, const char *file2) 
                     //BEGIN-THNAM-20120921
                     //if (strcmp(s1,s2)==0) continue;
                     //else PEflg=1;
+                    int i = strlen(s2)-1;
+                    while ((i>0) && (s2[i]==' '))
+                    {
+                        s2[i]=='\0';
+                        i--;
+                    }
                     bool trung=(strcmp(s1,s2)==0);
                     char* pch = strtok (s1,"|");
                     while (pch != NULL)
@@ -454,10 +460,10 @@ int compare(int solution_id, int test_id, const char *file1, const char *file2) 
                     //END-THNAM-20120921
                 }
 				//BEGIN-THNAM-20120930
-				if (PEflg) {
+				//if (PEflg) {
 					//write_log("Error '%s' vs '%s'",s1,s2);
 					//addrun_test(solution_id,test_id,PEflg,s2);
-				}
+				//}
 				//END-THNAM-20120930
                 delete [] s1;
                 delete [] s2;
@@ -1787,7 +1793,7 @@ int main(int argc, char** argv) {
                 /**/
                 if(ACflg == OJ_RE)addreinfo(solution_id);
                 //finalACflg=ACflg;
-                addrun_test(solution_id,test_id,ACflg,dirp->d_name);
+                //addrun_test(solution_id,test_id,ACflg,dirp->d_name);
                 ACflg=OJ_AC;
             }
             num_of_test++;
