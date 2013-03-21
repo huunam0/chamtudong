@@ -435,7 +435,11 @@ int compare(int solution_id, int test_id, const char *file1, const char *file2) 
                     while (pch != NULL)
                     {
                         //write_log("test %s",pch);
-						if (strcmp(pch,s2)==0) trung=true;
+						if (strcmp(pch,s2)==0)
+                        {
+                            trung=true;
+                            break;
+                        }
                         pch = strtok (NULL, "|");
                     }
 
