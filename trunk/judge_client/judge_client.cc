@@ -46,13 +46,13 @@
 #define OJ_CI 2
 #define OJ_RI 3
 #define OJ_AC 4
-#define OJ_PE 5 'presentation error
+#define OJ_PE 5 //presentation error
 #define OJ_WA 6
 #define OJ_TL 7
 #define OJ_ML 8
 #define OJ_OL 9
-#define OJ_RE 10 'runtime error
-#define OJ_CE 11 'compile error
+#define OJ_RE 10 //runtime error
+#define OJ_CE 11 //compile error
 #define OJ_CO 12
 
 /*copy from ZOJ
