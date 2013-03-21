@@ -9,20 +9,7 @@
  * Bug report email huunam0@gmail.com
  *
  *
- * This file is part of HUSTOJ.
  *
- * HUSTOJ is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * HUSTOJ is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with HUSTOJ. if not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <stdio.h>
@@ -59,13 +46,13 @@
 #define OJ_CI 2
 #define OJ_RI 3
 #define OJ_AC 4
-#define OJ_PE 5
+#define OJ_PE 5 'presentation error
 #define OJ_WA 6
 #define OJ_TL 7
 #define OJ_ML 8
 #define OJ_OL 9
-#define OJ_RE 10
-#define OJ_CE 11
+#define OJ_RE 10 'runtime error
+#define OJ_CE 11 'compile error
 #define OJ_CO 12
 
 /*copy from ZOJ
@@ -339,7 +326,7 @@ void addrun_test(int solution_id, int test_id, int error, char* output) {
  * http://code.google.com/p/zoj/source/browse/trunk/judge_client/client/text_checker.cc#25
  *
  */
- 
+
 int compare_zoj(const char *file1, const char *file2) {
         int ret = OJ_AC;
         FILE * f1, *f2;
@@ -1533,7 +1520,10 @@ void init_parameters(int argc, char ** argv, int & solution_id,int & runner_id) 
         }
         DEBUG = (argc > 4);
         if (argc > 3)
-                strcpy(oj_home, argv[3]);
+                //if (strcmp(argv[3],"debug")==0)
+				//	DEBUG=true;
+				//else
+					strcpy(oj_home, argv[3]);
         else
                 strcpy(oj_home, "/home/judge");
 
@@ -1776,7 +1766,7 @@ int main(int argc, char** argv) {
         }
         if(oi_mode){
             if(ACflg == OJ_AC && PEflg != OJ_PE){
-                pass_rate++;
+                pass_rate+=1;
                 //addrun_test(solution_id,atoi(dirp->d_name),0);
             }else{
                 /**/
@@ -1787,13 +1777,14 @@ int main(int argc, char** argv) {
                 /**/
                 if(ACflg == OJ_RE)addreinfo(solution_id);
                 //finalACflg=ACflg;
-                //addrun_test(solution_id,test_id,ACflg);
+                addrun_test(solution_id,test_id,ACflg,dirp->d_name);
                 ACflg=OJ_AC;
             }
             num_of_test++;
             ACflg = OJ_AC;
         }
     } //end for
+	write_log("Him has %f over %d",pass_rate,num_of_test);
     if (ACflg == OJ_AC && PEflg == OJ_PE)
         ACflg = OJ_PE;
     if (sim_enable && ACflg == OJ_AC &&(!oi_mode||finalACflg==OJ_AC)&& lang < 5) {//bash don't supported
