@@ -444,7 +444,12 @@ int compare(int solution_id, int test_id, const char *file1, const char *file2) 
                     }
 
                     if (trung) continue;
-                    else PEflg=1;
+                    else
+                    {
+                        PEflg=1;
+                        write_log("Error '%s' vs '%s'",s1,s2);
+                    }
+
                     //END-THNAM-20120921
                 }
 				//BEGIN-THNAM-20120930
